@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} - PyBlog 园地{% endblock %}
+
+{% block content %}
+<section class="empty-state">
+    <h1>{{ code }}</h1>
+    <p>{{ message }}</p>
+    <a class="button primary" href="{{ url_for('index') }}">回到首页</a>
+</section>
+{% endblock %}

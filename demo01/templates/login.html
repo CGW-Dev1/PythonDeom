@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}后台登录 - PyBlog 园地{% endblock %}
+
+{% block content %}
+<section class="auth-panel">
+    <p class="eyebrow">Admin</p>
+    <h1>后台登录</h1>
+    <form method="post" class="stack-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <label>
+            用户名
+            <input name="username" autocomplete="username" required>
+        </label>
+        <label>
+            密码
+            <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="button primary" type="submit">登录</button>
+    </form>
+    <p class="muted">默认账号：admin / admin123</p>
+    <p class="auth-links">还没有账号？<a href="{{ url_for('register') }}">立即注册</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PyBlog 园地{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="{{ url_for('index') }}">PyBlog 园地</a>
+            <nav class="product-nav" aria-label="站点导航">
+                <a href="{{ url_for('index') }}">博客</a>
+                <a href="{{ url_for('index', **active_query(tab='featured')) }}">精华</a>
+                <a href="{{ url_for('index', **active_query(tab='news')) }}">新闻</a>
+                <a href="{{ url_for('dashboard') }}">后台</a>
+                {% if session.get("user_id") %}
+                    <a href="{{ url_for('profile') }}">资料</a>
+                {% endif %}
+            </nav>
+            <form class="top-search" method="get" action="{{ url_for('index') }}">
+                <input type="search" name="q" value="{{ request.args.get('q', '') }}" placeholder="搜索文章、标签、作者">
+                <button type="submit">搜索</button>
+            </form>
+            <div class="account-nav">
+                {% if session.get("user_id") %}
+                    <a href="{{ url_for('profile') }}">{{ session.get("display_name") or session.get("username") }}</a>
+                    <form method="post" action="{{ url_for('logout') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <button class="link-button" type="submit">退出</button>
+                    </form>
+                {% else %}
+                    <a href="{{ url_for('login') }}">登录</a>
+                    <a href="{{ url_for('register') }}">注册</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <nav class="channel-bar" aria-label="频道导航">
+        <div class="channel-inner">
+            <a href="{{ url_for('index') }}">首页</a>
+            <a href="{{ url_for('index', **active_query(tab='candidate')) }}">候选</a>
+            <a href="{{ url_for('index', **active_query(tab='following')) }}">关注</a>
+            <a href="{{ url_for('index', **active_query(tab='featured')) }}">推荐</a>
+            <a href="{{ url_for('admin_comments') if session.get('user_id') else url_for('login') }}">评论管理</a>
+            <a href="{{ url_for('profile') if session.get('user_id') else url_for('register') }}">个人资料</a>
+        </div>
+    </nav>
+
+    <main class="page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <span>PyBlog 园地</span>
+        <a href="{{ url_for('index') }}">首页</a>
+        <a href="{{ url_for('dashboard') }}">后台管理</a>
+        <span>Flask + MySQL</span>
+    </footer>
+</body>
+</html>

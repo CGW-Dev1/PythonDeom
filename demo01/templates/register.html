@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}用户注册 - PyBlog 园地{% endblock %}
+
+{% block content %}
+<section class="auth-panel wide">
+    <p class="eyebrow">Join</p>
+    <h1>注册账号</h1>
+    <form method="post" class="stack-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="form-grid">
+            <label>
+                用户名
+                <input name="username" pattern="[A-Za-z0-9_]{3,30}" maxlength="30" required placeholder="letters_123">
+            </label>
+            <label>
+                昵称
+                <input name="display_name" maxlength="30" required placeholder="你的展示名">
+            </label>
+        </div>
+        <div class="form-grid">
+            <label>
+                密码
+                <input name="password" type="password" minlength="6" autocomplete="new-password" required>
+            </label>
+            <label>
+                确认密码
+                <input name="confirm_password" type="password" minlength="6" autocomplete="new-password" required>
+            </label>
+        </div>
+        <label>
+            头像颜色
+            <input name="avatar_color" type="color" value="#1d6fb8">
+        </label>
+        <label>
+            个人简介
+            <textarea name="bio" rows="4" maxlength="255" placeholder="写一点你关注的技术方向或博客主题"></textarea>
+        </label>
+        <button class="button primary" type="submit">注册并登录</button>
+    </form>
+    <p class="auth-links">已有账号？<a href="{{ url_for('login') }}">去登录</a></p>
+</section>
+{% endblock %}

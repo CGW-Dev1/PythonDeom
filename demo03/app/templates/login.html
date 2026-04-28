@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>二手房数据大屏 - 登录</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body class="login-body">
+    <main class="login-panel">
+        <div class="login-brand">
+            <span class="brand-mark">RE</span>
+            <div>
+                <h1>二手房数据大屏</h1>
+                <p>Second-hand Housing Analytics</p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notice {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" class="login-form">
+            <label>
+                <span>用户名</span>
+                <input name="username" value="admin" autocomplete="username" required>
+            </label>
+            <label>
+                <span>密码</span>
+                <input name="password" type="password" value="admin123" autocomplete="current-password" required>
+            </label>
+            <button type="submit">登录系统</button>
+        </form>
+        <div class="login-foot">管理员 admin/admin123，普通用户 viewer/viewer123</div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}评论管理 - PyBlog 园地{% endblock %}
+
+{% block content %}
+<section class="admin-heading">
+    <div>
+        <p class="eyebrow">Admin</p>
+        <h1>评论管理</h1>
+    </div>
+    <a class="button" href="{{ url_for('dashboard') }}">返回文章管理</a>
+</section>
+
+<section class="table-shell">
+    <table>
+        <thead>
+            <tr>
+                <th>评论</th>
+                <th>文章</th>
+                <th>状态</th>
+                <th>时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in comments %}
+                <tr>
+                    <td>
+                        <strong>{{ comment.author }}</strong>
+                        <span>{{ truncate_text(comment.body, 90) }}</span>
+                    </td>
+                    <td><a href="{{ url_for('post_detail', slug=comment.post_slug) }}">{{ comment.post_title }}</a></td>
+                    <td>
+                        <span class="status {{ 'published' if comment.is_approved else 'draft' }}">
+                            {{ "已显示" if comment.is_approved else "已隐藏" }}
+                        </span>
+                    </td>
+                    <td>{{ format_date(comment.created_at) }}</td>
+                    <td class="actions">
+                        <form method="post" action="{{ url_for('toggle_comment', comment_id=comment.id) }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <button class="button small" type="submit">{{ "隐藏" if comment.is_approved else "显示" }}</button>
+                        </form>
+                        <form method="post" action="{{ url_for('delete_comment', comment_id=comment.id) }}" onsubmit="return confirm('确定删除这条评论吗？')">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                            <button class="button small danger" type="submit">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="empty-cell">暂无评论。</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

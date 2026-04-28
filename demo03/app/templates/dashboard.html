@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>二手房数据可视化大屏</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body class="dashboard-body">
+    <header class="topbar">
+        <div class="title-block">
+            <div class="eyebrow">Real Estate Market Dashboard</div>
+            <h1>二手房数据可视化大屏</h1>
+        </div>
+        <div class="top-actions">
+            <span class="user-chip">{{ user.username }} · {{ "管理员" if user.role == "admin" else "普通用户" }}</span>
+            {% if user.role == "admin" %}
+            <a class="ghost-button" href="{{ url_for('pages.admin') }}">系统后台</a>
+            {% endif %}
+            <button id="fullscreenBtn" class="icon-button" title="全屏">⛶</button>
+            <button id="refreshBtn" class="primary-button">刷新</button>
+            <a class="ghost-button" href="{{ url_for('auth.logout') }}">退出</a>
+        </div>
+    </header>
+
+    <section class="filter-strip" aria-label="筛选查询">
+        <label>
+            <span>城市</span>
+            <select id="cityFilter"><option value="">全部城市</option></select>
+        </label>
+        <label>
+            <span>区域</span>
+            <select id="districtFilter"><option value="">全部区域</option></select>
+        </label>
+        <label>
+            <span>户型</span>
+            <select id="layoutFilter"><option value="">全部户型</option></select>
+        </label>
+        <label>
+            <span>状态</span>
+            <select id="statusFilter"><option value="">全部状态</option></select>
+        </label>
+        <label>
+            <span>总价</span>
+            <div class="range-inputs">
+                <input id="priceMin" type="number" min="0" placeholder="最低">
+                <input id="priceMax" type="number" min="0" placeholder="最高">
+            </div>
+        </label>
+        <label>
+            <span>面积</span>
+            <div class="range-inputs">
+                <input id="areaMin" type="number" min="0" placeholder="最低">
+                <input id="areaMax" type="number" min="0" placeholder="最高">
+            </div>
+        </label>
+        <label>
+            <span>时间</span>
+            <div class="range-inputs date-inputs">
+                <input id="startDate" type="date">
+                <input id="endDate" type="date">
+            </div>
+        </label>
+        <label class="keyword-label">
+            <span>搜索</span>
+            <input id="keywordFilter" type="search" placeholder="小区 / 板块">
+        </label>
+        <button id="applyFilters" class="primary-button">查询</button>
+        <button id="resetFilters" class="ghost-button">重置</button>
+    </section>
+
+    <main class="screen-grid">
+        <section class="metrics-grid" id="metricsGrid"></section>
+
+        <section class="panel wide">
+            <div class="panel-head">
+                <h2>区域价格与房源热力</h2>
+                <span id="qualityText">数据质量</span>
+            </div>
+            <div id="districtChart" class="chart tall"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>户型分布</h2></div>
+            <div id="layoutChart" class="chart"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>价格区间</h2></div>
+            <div id="priceChart" class="chart"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>面积区间</h2></div>
+            <div id="areaChart" class="chart"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>装修情况</h2></div>
+            <div id="decorationChart" class="chart"></div>
+        </section>
+
+        <section class="panel wide">
+            <div class="panel-head"><h2>挂牌均价与成交均价走势</h2></div>
+            <div id="priceTrendChart" class="chart tall"></div>
+        </section>
+
+        <section class="panel wide">
+            <div class="panel-head"><h2>供需与成交走势</h2></div>
+            <div id="supplyTrendChart" class="chart tall"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>配套价值分析</h2></div>
+            <div id="supportChart" class="chart"></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>楼层朝向分析</h2></div>
+            <div id="floorChart" class="chart"></div>
+        </section>
+
+        <section class="panel table-panel">
+            <div class="panel-head">
+                <h2>热门小区</h2>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>小区</th>
+                            <th>区域</th>
+                            <th>均价</th>
+                            <th>成交</th>
+                            <th>热度</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hotCommunityBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel table-panel details-panel">
+            <div class="panel-head">
+                <h2>房源明细</h2>
+                <div class="panel-actions">
+                    <button id="exportCsv" class="ghost-button small">导出 CSV</button>
+                    <button id="exportExcel" class="ghost-button small">导出 Excel</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>城市</th>
+                            <th>区域</th>
+                            <th>小区</th>
+                            <th>户型</th>
+                            <th>面积</th>
+                            <th>总价</th>
+                            <th>单价</th>
+                            <th>状态</th>
+                            <th>日期</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listingBody"></tbody>
+                </table>
+            </div>
+            <div class="pager">
+                <button id="prevPage" class="ghost-button small">上一页</button>
+                <span id="pageInfo">1 / 1</span>
+                <button id="nextPage" class="ghost-button small">下一页</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

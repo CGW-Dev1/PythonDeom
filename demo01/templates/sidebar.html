@@ -1,0 +1,68 @@
+<aside class="sidebar">
+    <section class="side-panel user-panel">
+        <div class="panel-title">站点状态</div>
+        <div class="quick-actions">
+            <a class="button primary" href="{{ url_for('create_post') if session.get('user_id') else url_for('login') }}">发布文章</a>
+            <a class="button" href="{{ url_for('profile') if session.get('user_id') else url_for('register') }}">{{ "个人资料" if session.get('user_id') else "注册账号" }}</a>
+        </div>
+    </section>
+
+    <section class="side-panel">
+        <div class="panel-title">分类</div>
+        <ul class="link-list">
+            {% for category in sidebar.categories %}
+                <li>
+                    <a href="{{ url_for('category', slug=category.slug) }}">{{ category.name }}</a>
+                    <span>{{ category.post_count }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="side-panel">
+        <div class="panel-title">推荐排行</div>
+        <ol class="rank-list">
+            {% for post in sidebar.featured %}
+                <li>
+                    <a href="{{ url_for('post_detail', slug=post.slug) }}">{{ post.title }}</a>
+                    <span>{{ post.recommend_count }}</span>
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <section class="side-panel">
+        <div class="panel-title">阅读排行</div>
+        <ol class="rank-list">
+            {% for post in sidebar.most_read %}
+                <li>
+                    <a href="{{ url_for('post_detail', slug=post.slug) }}">{{ post.title }}</a>
+                    <span>{{ post.view_count }}</span>
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <section class="side-panel">
+        <div class="panel-title">标签</div>
+        <div class="tag-cloud">
+            {% for tag in sidebar.tags %}
+                <a class="tag" href="{{ url_for('index', **active_query(tag=tag)) }}">{{ tag }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="side-panel">
+        <div class="panel-title">最新评论</div>
+        <div class="mini-comments">
+            {% for comment in sidebar.recent_comments %}
+                <a href="{{ url_for('post_detail', slug=comment.post_slug) }}#comments">
+                    <strong>{{ comment.author }}</strong>
+                    <span>{{ truncate_text(comment.body, 34) }}</span>
+                </a>
+            {% else %}
+                <p class="muted">暂无评论。</p>
+            {% endfor %}
+        </div>
+    </section>
+</aside>

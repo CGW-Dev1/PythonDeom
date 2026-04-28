@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>商品比价工具</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container-fluid app-container">
+      <div class="brand-block">
+        <div class="brand-mark">¥</div>
+        <div>
+          <h1>商品比价工具</h1>
+          <p>分类采集、自动排序、低价优先展示</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="adminToggle" class="btn btn-outline-light btn-sm icon-btn" type="button">
+          <i data-lucide="settings"></i>
+          管理
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container-fluid app-container py-4">
+    <section class="category-band">
+      <div class="section-heading">
+        <div>
+          <h2>商品分类</h2>
+          <span id="categorySummary">加载中</span>
+        </div>
+      </div>
+      <div id="categoryTabs" class="category-tabs" role="tablist"></div>
+    </section>
+
+    <section id="adminPanel" class="admin-panel d-none">
+      <div class="admin-grid">
+        <div class="admin-section">
+          <h2>分类维护</h2>
+          <div class="input-group mb-3">
+            <input id="newCategoryName" class="form-control" maxlength="30" placeholder="新分类名称">
+            <button id="addCategoryBtn" class="btn btn-primary icon-btn" type="button">
+              <i data-lucide="plus"></i>
+              新增
+            </button>
+          </div>
+          <div id="categoryAdminList" class="admin-list"></div>
+        </div>
+
+        <div class="admin-section">
+          <h2>爬虫配置</h2>
+          <div class="config-grid">
+            <label class="form-label">
+              超时时间（秒）
+              <input id="timeoutInput" class="form-control" type="number" min="1" max="15">
+            </label>
+            <label class="form-label">
+              批量上限
+              <input id="batchInput" class="form-control" type="number" min="1" max="50">
+            </label>
+          </div>
+          <div id="platformSwitches" class="platform-switches"></div>
+          <button id="saveConfigBtn" class="btn btn-primary icon-btn" type="button">
+            <i data-lucide="save"></i>
+            保存配置
+          </button>
+        </div>
+
+        <div class="admin-section metrics-section">
+          <h2>系统监控</h2>
+          <div id="metricsBar" class="metrics-bar"></div>
+          <div id="logList" class="log-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="workspace-top">
+        <div>
+          <h2 id="activeCategoryTitle">比价区</h2>
+          <span id="activeCategoryMeta">请选择分类</span>
+        </div>
+        <div class="toolbar">
+          <button id="refreshBtn" class="btn btn-outline-primary icon-btn" type="button">
+            <i data-lucide="refresh-cw"></i>
+            刷新价格
+          </button>
+          <button id="clearBtn" class="btn btn-outline-danger icon-btn" type="button">
+            <i data-lucide="trash-2"></i>
+            清空记录
+          </button>
+        </div>
+      </div>
+
+      <div class="collector-panel">
+        <textarea id="urlInput" class="form-control" rows="4" placeholder="粘贴商品网址，多个网址可换行输入"></textarea>
+        <div class="collector-actions">
+          <button id="collectBtn" class="btn btn-primary icon-btn" type="button">
+            <i data-lucide="search"></i>
+            获取价格
+          </button>
+          <div id="statusBox" class="status-box" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <div class="result-heading">
+          <h2>比价结果</h2>
+          <span id="resultCount">0 条记录</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle result-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>价格</th>
+                <th>平台</th>
+                <th>商品网址</th>
+                <th>采集时间</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container-fluid app-container">
+      <span>Copyright 2026 商品比价工具</span>
+      <span>仅采集公开商品页面数据</span>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

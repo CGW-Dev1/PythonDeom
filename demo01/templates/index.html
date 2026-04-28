@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if current_category %}{{ current_category.name }} - {% endif %}PyBlog 园地
+{% endblock %}
+
+{% block content %}
+<section class="portal-layout">
+    <div class="main-column">
+        <div class="headline-strip">
+            <div>
+                <p class="eyebrow">Developer Community</p>
+                <h1>{% if current_category %}{{ current_category.name }}{% else %}技术文章与开发随笔{% endif %}</h1>
+            </div>
+            <a class="button primary" href="{{ url_for('create_post') if session.get('user_id') else url_for('login') }}">写文章</a>
+        </div>
+
+        <div class="tabbar">
+            {% for key, label in tabs %}
+                {% if current_category %}
+                    <a class="{{ 'active' if filters.tab == key else '' }}" href="{{ url_for('category', slug=current_category.slug, **active_query(tab=key)) }}">{{ label }}</a>
+                {% else %}
+                    <a class="{{ 'active' if filters.tab == key else '' }}" href="{{ url_for('index', **active_query(tab=key)) }}">{{ label }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="filter-row">
+            <form class="inline-search" method="get" action="{{ url_for('index') }}">
+                <input type="hidden" name="tab" value="{{ filters.tab }}">
+                {% if filters.tag %}<input type="hidden" name="tag" value="{{ filters.tag }}">{% endif %}
+                <input type="search" name="q" value="{{ filters.q }}" placeholder="在当前列表搜索">
+                <button class="button" type="submit">筛选</button>
+            </form>
+            <span>{{ total }} 篇文章</span>
+        </div>
+
+        <div class="category-grid">
+            {% for category in categories %}
+                <a href="{{ url_for('category', slug=category.slug) }}" class="{{ 'active' if current_category and current_category.id == category.id else '' }}">{{ category.name }}</a>
+            {% endfor %}
+        </div>
+
+        <section class="feed-list">
+            {% for post in posts %}
+                <article class="feed-item">
+                    <div class="vote-box">
+                        <strong>{{ post.recommend_count }}</strong>
+                        <span>推荐</span>
+                    </div>
+                    <div class="feed-body">
+                        <div class="feed-meta">
+                            <a class="author-link" href="{{ url_for('author', username=post.username) }}">
+                                <span class="avatar" style="--avatar: {{ post.avatar_color }}">{{ post.display_name[:1] }}</span>
+                                {{ post.display_name }}
+                            </a>
+                            {% if post.category_name %}
+                                <a href="{{ url_for('category', slug=post.category_slug) }}">{{ post.category_name }}</a>
+                            {% endif %}
+                            <time datetime="{{ post.created_at }}">{{ format_date(post.created_at) }}</time>
+                        </div>
+                        <h2><a href="{{ url_for('post_detail', slug=post.slug) }}">{{ post.title }}</a></h2>
+                        <p>{{ post.summary }}</p>
+                        <div class="feed-footer">
+                            <span>阅读 {{ post.view_count }}</span>
+                            <span>评论 {{ post.comment_count }}</span>
+                            {% if post.is_featured %}<span class="mark">精华</span>{% endif %}
+                            <div class="tag-row">
+                                {% for item in split_tags(post.tags) %}
+                                    <a class="tag" href="{{ url_for('index', **active_query(tag=item)) }}">{{ item }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            {% else %}
+                <div class="empty-state">
+                    <h2>没有找到文章</h2>
+                    <p>换个关键词或分类再试试。</p>
+                </div>
+            {% endfor %}
+        </section>
+
+        {% if pages > 1 %}
+            <nav class="pager" aria-label="分页">
+                {% if filters.page > 1 %}
+                    <a href="{{ url_for('category', slug=current_category.slug, **active_query(page=filters.page - 1)) if current_category else url_for('index', **active_query(page=filters.page - 1)) }}">上一页</a>
+                {% endif %}
+                <span>第 {{ filters.page }} / {{ pages }} 页</span>
+                {% if filters.page < pages %}
+                    <a href="{{ url_for('category', slug=current_category.slug, **active_query(page=filters.page + 1)) if current_category else url_for('index', **active_query(page=filters.page + 1)) }}">下一页</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </div>
+
+    {% include "sidebar.html" %}
+</section>
+{% endblock %}

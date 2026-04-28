@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - PyBlog 园地{% endblock %}
+
+{% block content %}
+<section class="portal-layout">
+    <div class="main-column">
+        <article class="article">
+            <div class="feed-meta">
+                <a class="author-link" href="{{ url_for('author', username=post.username) }}">
+                    <span class="avatar" style="--avatar: {{ post.avatar_color }}">{{ post.display_name[:1] }}</span>
+                    {{ post.display_name }}
+                </a>
+                {% if post.category_name %}
+                    <a href="{{ url_for('category', slug=post.category_slug) }}">{{ post.category_name }}</a>
+                {% endif %}
+                <time datetime="{{ post.created_at }}">{{ format_date(post.created_at) }}</time>
+            </div>
+            <h1>{{ post.title }}</h1>
+            <p class="lead">{{ post.summary }}</p>
+            <div class="article-stats">
+                <span>阅读 {{ post.view_count }}</span>
+                <span>评论 {{ post.comment_count }}</span>
+                <span>推荐 {{ post.recommend_count }}</span>
+                {% if post.is_featured %}<span class="mark">精华</span>{% endif %}
+            </div>
+            <div class="tag-row spaced">
+                {% for item in split_tags(post.tags) %}
+                    <a class="tag" href="{{ url_for('index', **active_query(tag=item)) }}">{{ item }}</a>
+                {% endfor %}
+            </div>
+            <div class="article-body">
+                {{ render_content(post.content) }}
+            </div>
+            <form class="recommend-form" method="post" action="{{ url_for('recommend_post', post_id=post.id) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <button class="button primary" type="submit">推荐这篇文章</button>
+            </form>
+        </article>
+
+        {% if related_posts %}
+            <section class="related-block">
+                <h2>同类文章</h2>
+                <ul class="plain-list">
+                    {% for item in related_posts %}
+                        <li><a href="{{ url_for('post_detail', slug=item.slug) }}">{{ item.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <section class="comments" id="comments">
+            <div class="section-heading">
+                <h2>评论</h2>
+                <span>{{ comments|length }} 条</span>
+            </div>
+            <form class="comment-form" method="post">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <label>
+                    昵称
+                    <input name="author" maxlength="40" required>
+                </label>
+                <label>
+                    评论内容
+                    <textarea name="body" rows="4" required></textarea>
+                </label>
+                <button class="button primary" type="submit">发布评论</button>
+            </form>
+
+            <div class="comment-list">
+                {% for comment in comments %}
+                    <article class="comment">
+                        <div class="feed-meta">
+                            <strong>{{ comment.author }}</strong>
+                            <time datetime="{{ comment.created_at }}">{{ format_date(comment.created_at) }}</time>
+                        </div>
+                        <p>{{ comment.body }}</p>
+                    </article>
+                {% else %}
+                    <p class="muted">暂无评论。</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    {% include "sidebar.html" %}
+</section>
+{% endblock %}

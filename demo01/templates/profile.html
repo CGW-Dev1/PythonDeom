@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}个人资料 - PyBlog 园地{% endblock %}
+
+{% block content %}
+<section class="profile-layout">
+    <aside class="profile-card">
+        <span class="avatar large" style="--avatar: {{ user.avatar_color }}">{{ user.display_name[:1] }}</span>
+        <h1>{{ user.display_name }}</h1>
+        <p>{{ user.bio or "这个人暂时还没有写简介。" }}</p>
+        <span class="status {{ 'featured' if user.role == 'admin' else 'published' }}">{{ "管理员" if user.role == "admin" else "作者" }}</span>
+    </aside>
+
+    <form class="editor profile-form" method="post">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="form-grid">
+            <label>
+                用户名
+                <input value="{{ user.username }}" disabled>
+            </label>
+            <label>
+                头像颜色
+                <input name="avatar_color" type="color" value="{{ user.avatar_color }}">
+            </label>
+        </div>
+        <label>
+            昵称
+            <input name="display_name" value="{{ user.display_name }}" maxlength="30" required>
+        </label>
+        <label>
+            个人简介
+            <textarea name="bio" rows="5" maxlength="255">{{ user.bio }}</textarea>
+        </label>
+
+        <div class="password-panel">
+            <h2>修改密码</h2>
+            <p class="muted">不需要改密码时留空即可。</p>
+            <div class="form-grid">
+                <label>
+                    当前密码
+                    <input name="current_password" type="password" autocomplete="current-password">
+                </label>
+                <label>
+                    新密码
+                    <input name="new_password" type="password" minlength="6" autocomplete="new-password">
+                </label>
+            </div>
+            <label>
+                确认新密码
+                <input name="confirm_password" type="password" minlength="6" autocomplete="new-password">
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button class="button primary" type="submit">保存资料</button>
+            <a class="button" href="{{ url_for('dashboard') }}">我的后台</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
