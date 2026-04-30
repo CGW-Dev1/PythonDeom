@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>智能火车票查询系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<main class="layout">
+    <section class="search-band">
+        <form class="search-form" action="/search" method="post">
+            <div class="brand">
+                <h1>智能火车票查询系统</h1>
+                <p>真实 12306 数据 · 自动中转规划</p>
+            </div>
+
+            <label>
+                <span>出发地</span>
+                <input name="from" list="station-list" value="{{ form.from if form else '广州' }}" required>
+            </label>
+            <label>
+                <span>目的地</span>
+                <input name="to" list="station-list" value="{{ form.to if form else '铁岭' }}" required>
+            </label>
+            <label>
+                <span>出发日期</span>
+                <input name="date" type="date" value="{{ form.date if form else default_date }}" required>
+            </label>
+            <label>
+                <span>推荐偏好</span>
+                <select name="preference">
+                    {% set pref = form.preference if form else 'balanced' %}
+                    <option value="balanced" {% if pref == 'balanced' %}selected{% endif %}>距离优先 · 兼顾价格时间</option>
+                    <option value="distance" {% if pref == 'distance' %}selected{% endif %}>距离最短</option>
+                    <option value="price" {% if pref == 'price' %}selected{% endif %}>价格最低</option>
+                    <option value="time" {% if pref == 'time' %}selected{% endif %}>时间最短</option>
+                    <option value="transfer" {% if pref == 'transfer' %}selected{% endif %}>少换乘</option>
+                </select>
+            </label>
+            <label>
+                <span>中转城市数</span>
+                <input name="max_transfer_cities" type="number" min="1" max="12" value="{{ form.max_transfer_cities if form else 6 }}">
+            </label>
+            <button type="submit">查询路线</button>
+            <datalist id="station-list"></datalist>
+        </form>
+    </section>
+
+    {% if error %}
+        <section class="message error">{{ error }}</section>
+    {% endif %}
+
+    {% if result %}
+        <section class="summary">
+            <div>
+                <span>出发</span>
+                <strong>{{ result.query.from }}</strong>
+            </div>
+            <div>
+                <span>到达</span>
+                <strong>{{ result.query.to }}</strong>
+            </div>
+            <div>
+                <span>直达</span>
+                <strong>{{ result.summary.direct_count }}</strong>
+            </div>
+            <div>
+                <span>中转</span>
+                <strong>{{ result.summary.transfer_count }}</strong>
+            </div>
+            <div>
+                <span>候选中转</span>
+                <strong>{{ result.query.transfer_cities | join('、') }}</strong>
+            </div>
+        </section>
+
+        {% if not result.routes %}
+            <section class="message">没有找到可组合的真实车次。可以增加中转城市数，或换一个出发日期。</section>
+        {% endif %}
+
+        <section class="routes">
+            {% for route in result.routes %}
+                <article class="route-card">
+                    <header class="route-header">
+                        <div>
+                            <span class="tag">{{ route.recommendation }}</span>
+                            <h2>
+                                {{ route.legs[0].from_station.name }}
+                                {% for leg in route.legs %}
+                                    <span>→</span> {{ leg.to_station.name }}
+                                {% endfor %}
+                            </h2>
+                        </div>
+                        <div class="price">
+                            {% if route.total_price %}
+                                ¥{{ "%.1f"|format(route.total_price) }} 起
+                            {% else %}
+                                票价待查
+                            {% endif %}
+                        </div>
+                    </header>
+
+                    <div class="metrics">
+                        <span>距离约 {{ route.distance_km }} km</span>
+                        <span>总耗时 {{ route.total_minutes // 60 }}小时{{ route.total_minutes % 60 }}分钟</span>
+                        <span>中转 {{ route.transfer_count }} 次</span>
+                        {% if route.wait_minutes %}
+                            <span>等待 {{ route.wait_minutes // 60 }}小时{{ route.wait_minutes % 60 }}分钟</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="legs">
+                        {% for leg in route.legs %}
+                            <div class="leg">
+                                <div class="train-code">{{ leg.train_code }}</div>
+                                <div class="time-block">
+                                    <strong>{{ leg.depart_at[11:] }}</strong>
+                                    <span>{{ leg.from_station.name }}</span>
+                                    <small>{{ leg.depart_at[:10] }}</small>
+                                </div>
+                                <div class="duration">{{ leg.duration_text }}</div>
+                                <div class="time-block">
+                                    <strong>{{ leg.arrive_at[11:] }}</strong>
+                                    <span>{{ leg.to_station.name }}</span>
+                                    <small>{{ leg.arrive_at[:10] }}</small>
+                                </div>
+                                <div class="stock">
+                                    {% for seat, value in leg.seat_stock.items() %}
+                                        {% if value != '--' %}
+                                            <span>{{ seat }} {{ value }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="seat-prices">
+                                    {% for seat, price in leg.price_map.items() %}
+                                        <span>{{ seat }} ¥{{ "%.1f"|format(price) }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <footer class="reasons">
+                        {% for reason in route.reasons %}
+                            <span>{{ reason }}</span>
+                        {% endfor %}
+                    </footer>
+                </article>
+            {% endfor %}
+        </section>
+    {% endif %}
+</main>
+
+<script>
+const inputs = document.querySelectorAll('input[list="station-list"]');
+const datalist = document.querySelector('#station-list');
+let timer = null;
+
+inputs.forEach((input) => {
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        const q = input.value.trim();
+        if (!q) return;
+        timer = setTimeout(async () => {
+            const response = await fetch(`/api/stations?q=${encodeURIComponent(q)}`);
+            if (!response.ok) return;
+            const stations = await response.json();
+            datalist.innerHTML = stations
+                .map((station) => `<option value="${station.name}">${station.city} · ${station.code}</option>`)
+                .join('');
+        }, 180);
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+server.log
+server.err.log
+data/station_name.js
+.idea/
