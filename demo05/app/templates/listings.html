@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}房源查询 - 房租数据分析系统{% endblock %}
+
+{% block content %}
+<section class="section-head compact">
+    <div>
+        <p class="eyebrow">Listings</p>
+        <h1>房源数据查询</h1>
+        <p class="subtle">按区域、户型与租金范围筛选已入库房源。</p>
+    </div>
+</section>
+
+<section class="filter-bar">
+    <select id="districtFilter" aria-label="区域筛选">
+        <option value="">全部区域</option>
+    </select>
+    <select id="houseTypeFilter" aria-label="户型筛选">
+        <option value="">全部户型</option>
+    </select>
+    <input id="minPriceFilter" type="number" min="0" placeholder="最低租金">
+    <input id="maxPriceFilter" type="number" min="0" placeholder="最高租金">
+    <button class="btn" id="searchBtn" type="button">查询</button>
+    <button class="btn secondary" id="resetBtn" type="button">重置</button>
+</section>
+
+<section class="panel table-panel">
+    <div class="panel-head">
+        <h2>房源列表</h2>
+        <span id="listingTotal" class="subtle"></span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>区域</th>
+                    <th>小区</th>
+                    <th>租金</th>
+                    <th>面积</th>
+                    <th>户型</th>
+                    <th>朝向</th>
+                    <th>楼层</th>
+                    <th>标签</th>
+                    <th>发布时间</th>
+                </tr>
+            </thead>
+            <tbody id="listingBody"></tbody>
+        </table>
+    </div>
+    <div class="pagination">
+        <button class="icon-btn" id="prevPageBtn" type="button" aria-label="上一页">‹</button>
+        <span id="pageInfo">第 1 页</span>
+        <button class="icon-btn" id="nextPageBtn" type="button" aria-label="下一页">›</button>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/listings.js') }}"></script>
+{% endblock %}

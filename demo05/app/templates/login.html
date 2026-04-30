@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 房租数据分析系统{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <form class="auth-form" method="post">
+        <h1>用户登录</h1>
+        <label>
+            用户名
+            <input name="username" autocomplete="username" required>
+        </label>
+        <label>
+            密码
+            <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="btn full" type="submit">登录</button>
+        <p class="subtle">还没有账号？<a href="{{ url_for('main.register') }}">立即注册</a></p>
+    </form>
+</section>
+{% endblock %}

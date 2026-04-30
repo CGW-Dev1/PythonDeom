@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}数据看板 - 房租数据分析系统{% endblock %}
+
+{% block content %}
+<section class="section-head">
+    <div>
+        <p class="eyebrow">Rental Intelligence</p>
+        <h1>城市租房数据看板</h1>
+        <p class="subtle">采集、清洗、分析并展示区域、户型、面积和朝向维度的租金规律。</p>
+    </div>
+    <div class="toolbar">
+        <button class="btn secondary" id="seedDataBtn" type="button">导入演示数据</button>
+        <select id="platformSelect" aria-label="选择采集平台">
+            <option value="58">58同城</option>
+            <option value="fang">房天下</option>
+        </select>
+        <select id="citySelect" aria-label="选择城市">
+            <option value="bj">北京</option>
+            <option value="sh">上海</option>
+            <option value="gz">广州</option>
+            <option value="sz">深圳</option>
+        </select>
+        <input id="maxPagesInput" type="number" min="1" max="20" value="3" aria-label="采集页数">
+        <button class="btn" id="crawlBtn" type="button">启动采集</button>
+    </div>
+</section>
+
+<div id="dashboardMessage" class="inline-message" hidden></div>
+
+<section class="metric-grid" id="metricGrid">
+    <article class="metric"><span>房源总数</span><strong data-stat="total">0</strong></article>
+    <article class="metric"><span>覆盖区域</span><strong data-stat="district_count">0</strong></article>
+    <article class="metric"><span>平均租金</span><strong data-stat="avg_rent">0</strong></article>
+    <article class="metric"><span>平均单价</span><strong data-stat="avg_unit_price">0</strong></article>
+</section>
+
+<section class="content-grid">
+    <div class="panel wide">
+        <div class="panel-head">
+            <h2>区域平均租金排行</h2>
+            <a href="{{ url_for('main.listings_page') }}">查看房源</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>区域</th>
+                        <th>平均租金</th>
+                        <th>平均单价</th>
+                        <th>样本数</th>
+                    </tr>
+                </thead>
+                <tbody id="districtStatsBody"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel">
+        <div class="panel-head">
+            <h2>户型租金</h2>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>户型</th>
+                        <th>平均租金</th>
+                        <th>数量</th>
+                    </tr>
+                </thead>
+                <tbody id="houseTypeStatsBody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="chart-grid" id="chartGrid">
+    <figure class="chart"><figcaption>各区域平均租金</figcaption><img data-chart="district_bar" alt="各区域平均租金图"></figure>
+    <figure class="chart"><figcaption>不同户型平均租金</figcaption><img data-chart="house_type_bar" alt="不同户型平均租金图"></figure>
+    <figure class="chart"><figcaption>面积分段单位租金</figcaption><img data-chart="area_line" alt="面积分段单位租金图"></figure>
+    <figure class="chart"><figcaption>不同朝向平均租金</figcaption><img data-chart="orientation_bar" alt="不同朝向平均租金图"></figure>
+    <figure class="chart"><figcaption>租金分布</figcaption><img data-chart="rent_hist" alt="租金分布图"></figure>
+</section>
+{% endblock %}

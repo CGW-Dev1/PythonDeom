@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}房租数据分析系统{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('main.index') }}">房租数据分析系统</a>
+        <nav class="nav">
+            <a href="{{ url_for('main.index') }}">数据看板</a>
+            <a href="{{ url_for('main.listings_page') }}">房源查询</a>
+            {% if current_user %}
+                <span class="user-name">{{ current_user.username }}</span>
+                <a href="{{ url_for('main.logout') }}">退出</a>
+            {% else %}
+                <a href="{{ url_for('main.login') }}">登录</a>
+                <a class="nav-action" href="{{ url_for('main.register') }}">注册</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-wrap">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="page">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
